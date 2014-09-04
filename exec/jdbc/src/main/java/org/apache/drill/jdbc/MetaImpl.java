@@ -27,7 +27,7 @@ import net.hydromatic.avatica.AvaticaStatement;
 import net.hydromatic.avatica.Cursor;
 import net.hydromatic.avatica.Meta;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.drill.common.exceptions.DrillRuntimeException;
 
 
@@ -97,22 +97,22 @@ public class MetaImpl implements Meta {
         + "FROM INFORMATION_SCHEMA.`TABLES` WHERE 1=1 ");
 
     if(catalog != null){
-      sb.append(" AND TABLE_CATALOG = '" + StringEscapeUtils.escapeSql(catalog) + "' ");
+      sb.append(" AND TABLE_CATALOG = '" + escapeSql(catalog) + "' ");
     }
 
     if(schemaPattern.s != null){
-      sb.append(" AND TABLE_SCHEMA like '" + StringEscapeUtils.escapeSql(schemaPattern.s) + "'");
+      sb.append(" AND TABLE_SCHEMA like '" + escapeSql(schemaPattern.s) + "'");
     }
 
     if(tableNamePattern.s != null){
-      sb.append(" AND TABLE_NAME like '" + StringEscapeUtils.escapeSql(tableNamePattern.s) + "'");
+      sb.append(" AND TABLE_NAME like '" + escapeSql(tableNamePattern.s) + "'");
     }
 
     if(typeList != null && typeList.size() > 0){
       sb.append("AND (");
       for(int t = 0; t < typeList.size(); t++){
         if(t != 0) sb.append(" OR ");
-        sb.append(" TABLE_TYPE LIKE '" + StringEscapeUtils.escapeSql(typeList.get(t)) + "' ");
+        sb.append(" TABLE_TYPE LIKE '" + escapeSql(typeList.get(t)) + "' ");
       }
       sb.append(")");
     }
@@ -153,18 +153,18 @@ public class MetaImpl implements Meta {
         + "WHERE 1=1 ");
 
     if(catalog != null){
-      sb.append(" AND TABLE_CATALOG = '" + StringEscapeUtils.escapeSql(catalog) + "' ");
+      sb.append(" AND TABLE_CATALOG = '" + escapeSql(catalog) + "' ");
     }
     if(schemaPattern.s != null){
-      sb.append(" AND TABLE_SCHEMA like '" + StringEscapeUtils.escapeSql(schemaPattern.s) + "'");
+      sb.append(" AND TABLE_SCHEMA like '" + escapeSql(schemaPattern.s) + "'");
     }
 
     if(tableNamePattern.s != null){
-      sb.append(" AND TABLE_NAME like '" + StringEscapeUtils.escapeSql(tableNamePattern.s) + "'");
+      sb.append(" AND TABLE_NAME like '" + escapeSql(tableNamePattern.s) + "'");
     }
 
     if(columnNamePattern.s != null){
-      sb.append(" AND COLUMN_NAME like '" + StringEscapeUtils.escapeSql(columnNamePattern.s) + "'");
+      sb.append(" AND COLUMN_NAME like '" + escapeSql(columnNamePattern.s) + "'");
     }
 
     sb.append(" ORDER BY TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME");
@@ -180,10 +180,10 @@ public class MetaImpl implements Meta {
         + " FROM INFORMATION_SCHEMA.SCHEMATA WHERE 1=1 ");
 
     if(catalog != null){
-      sb.append(" AND CATALOG_NAME = '" + StringEscapeUtils.escapeSql(catalog) + "' ");
+      sb.append(" AND CATALOG_NAME = '" + escapeSql(catalog) + "' ");
     }
     if(schemaPattern.s != null){
-      sb.append(" AND SCHEMA_NAME like '" + StringEscapeUtils.escapeSql(schemaPattern.s) + "'");
+      sb.append(" AND SCHEMA_NAME like '" + escapeSql(schemaPattern.s) + "'");
     }
     sb.append(" ORDER BY CATALOG_NAME, SCHEMA_NAME");
 
@@ -298,6 +298,19 @@ public class MetaImpl implements Meta {
 
   interface Named {
     String getName();
+  }
+
+  /**
+   * Copied form commons-lang 2.x code as common-lang 3.x has this API removed.
+   * (http://commons.apache.org/proper/commons-lang/article3_0.html#StringEscapeUtils.escapeSql)
+   * @param str
+   * @return
+   */
+  static String escapeSql(String str) {
+    if (str == null) {
+      return null;
+    }
+    return StringUtils.replace(str, "'", "''");
   }
 
 }

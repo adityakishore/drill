@@ -19,7 +19,9 @@ package org.apache.drill.jdbc;
 
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.apache.drill.common.types.Types;
 import org.apache.drill.common.types.TypeProtos.DataMode;
@@ -161,4 +163,30 @@ public class DrillColumnMetaDataList extends BasicList<ColumnMetaData>{
 
     return "?";
 }
+
+  @Override
+  public Iterator<ColumnMetaData> iterator() {
+    return new Iterator<ColumnMetaData>() {
+      int currentColumnIndex = 0;
+
+      @Override
+      public void remove() {
+        new UnsupportedOperationException("remove() not supported on this iterator.");
+      }
+
+      @Override
+      public ColumnMetaData next() {
+        if (!hasNext()) {
+          throw new NoSuchElementException();
+        }
+        return columns[currentColumnIndex++];
+      }
+
+      @Override
+      public boolean hasNext() {
+        return columns != null && currentColumnIndex < columns.length;
+      }
+    };
+  }
+
 }
